@@ -1,3 +1,21 @@
+/*
+ * https://PowerNukkit.org - The Nukkit you know but Powerful!
+ * Copyright (C) 2021  José Roberto de Araújo Júnior
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package org.powernukkit.plugins.reservedslots;
 
 import cn.nukkit.Player;
@@ -7,6 +25,7 @@ import cn.nukkit.event.Listener;
 import cn.nukkit.event.player.PlayerEvent;
 import cn.nukkit.event.player.PlayerKickEvent;
 import cn.nukkit.event.player.PlayerPreLoginEvent;
+import cn.nukkit.event.server.QueryRegenerateEvent;
 import cn.nukkit.utils.Config;
 import cn.nukkit.utils.ConfigSection;
 import it.unimi.dsi.fastutil.ints.AbstractInt2ObjectMap;
@@ -17,6 +36,10 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * @author joserobjr
+ * @since 2021-06-28
+ */
 class ReservedSlotsListener implements Listener {
     private static final String PERM_NOT_AFFECTED = "reservedslots.notaffected";
     private static final String PERM_JOIN_FULL = "reservedslots.joinfull";
@@ -32,6 +55,18 @@ class ReservedSlotsListener implements Listener {
     ReservedSlotsListener(Config config, ResourceBundle messages) {
         this.config = config;
         this.defaultMessages = messages;
+    }
+    
+    @EventHandler(ignoreCancelled = true)
+    public void onQueryRegenerateEvent(QueryRegenerateEvent event) {
+        if (event.getMaxPlayerCount() > event.getPlayerCount()) {
+            return;
+        }
+        
+        String shouldChange = config.getString("change-ping-packet", "default");
+        if (shouldChange.equalsIgnoreCase("default") || shouldChange.equalsIgnoreCase("true")) {
+            event.setMaxPlayerCount(event.getPlayerCount() + 1);
+        }
     }
 
     @EventHandler(ignoreCancelled = true)
@@ -92,13 +127,15 @@ class ReservedSlotsListener implements Listener {
                 .filter(e-> e != null && e.getKey() != null && e.getValue() != null)
                 .map(e-> {
                     try {
-                        return new AbstractMap.SimpleEntry<>(Integer.parseInt(e.getKey()), e.getValue().toString());
+                        return new AbstractInt2ObjectMap.BasicEntry<>(Integer.parseInt(e.getKey()), e.getValue().toString());
                     } catch (NumberFormatException ignored) {
                         return null;
                     }
                 })
                 .filter(Objects::nonNull)
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a,b)->b, Int2ObjectOpenHashMap::new));
+                .filter(e-> e.getIntKey() >= 0)
+                .collect(Collectors.toMap(Int2ObjectMap.Entry::getIntKey, Int2ObjectMap.Entry::getValue, (a,b)->b, 
+                        Int2ObjectOpenHashMap::new));
         
         messagesCache = cache;
         messagesHash = hash;
@@ -115,8 +152,9 @@ class ReservedSlotsListener implements Listener {
                 .filter(e -> e != null && e.getKey() != null && e.getValue() instanceof Number)
                 .map(e-> new AbstractInt2ObjectMap.BasicEntry<>(((Number)e.getValue()).intValue(), e.getKey()))
                 .filter(e -> e.getIntKey() > 0)
-                .collect(Collectors.toMap(Int2ObjectMap.Entry::getIntKey, Int2ObjectMap.Entry::getValue, 
-                        (a, b) -> b, Int2ObjectOpenHashMap::new));
+                .collect(Collectors.toMap(Int2ObjectMap.Entry::getIntKey, Int2ObjectMap.Entry::getValue, (a, b) -> b,
+                        Int2ObjectOpenHashMap::new));
+        
         reservedSlotsCache = map;
         reservedSlotsHash = hash;
         return map;
