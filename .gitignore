@@ -16,3 +16,4 @@ buildNumber.properties
 *.iml
 .project
 /run
+/logs
