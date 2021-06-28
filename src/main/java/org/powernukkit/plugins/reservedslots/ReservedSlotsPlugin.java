@@ -46,8 +46,8 @@ public class ReservedSlotsPlugin extends PluginBase {
             return Locale.forLanguageTag(iso6391);
         }
         
-        switch (language.getLang()) {
-            case "bra": return Locale.forLanguageTag("pt_BR");
+        switch (language.getLang().toLowerCase(Locale.ENGLISH)) {
+            case "bra": return new Locale("pt", "BR");
             case "chs": return Locale.SIMPLIFIED_CHINESE;
             case "cht": return Locale.TRADITIONAL_CHINESE;
             case "cze": return Locale.forLanguageTag("cs");
@@ -62,7 +62,7 @@ public class ReservedSlotsPlugin extends PluginBase {
             case "spa": return Locale.forLanguageTag("es");
             case "tur": return Locale.forLanguageTag("tr");
             case "ukr": return Locale.forLanguageTag("uk");
-            case "vi": return Locale.forLanguageTag("vi");
+            case "vie": return Locale.forLanguageTag("vi");
             default: case "eng": return Locale.ENGLISH;
         }
     }

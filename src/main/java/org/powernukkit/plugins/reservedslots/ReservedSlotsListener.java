@@ -41,8 +41,9 @@ import java.util.stream.Collectors;
  * @since 2021-06-28
  */
 class ReservedSlotsListener implements Listener {
-    private static final String PERM_NOT_AFFECTED = "reservedslots.notaffected";
-    private static final String PERM_JOIN_FULL = "reservedslots.joinfull";
+    static final String PERM_NOT_AFFECTED = "reservedslots.notaffected";
+    static final String PERM_JOIN_FULL = "reservedslots.joinfull";
+    static final String DEFAULT_VALUE = "default";
     
     private final Config config;
     private final ResourceBundle defaultMessages;
@@ -63,8 +64,7 @@ class ReservedSlotsListener implements Listener {
             return;
         }
         
-        String shouldChange = config.getString("change-ping-packet", "default");
-        if (shouldChange.equalsIgnoreCase("default") || shouldChange.equalsIgnoreCase("true")) {
+        if (getBoolean("change-ping-packet", true)) {
             event.setMaxPlayerCount(event.getPlayerCount() + 1);
         }
     }
@@ -149,9 +149,19 @@ class ReservedSlotsListener implements Listener {
             return reservedSlotsCache;
         }
         Int2ObjectMap<String> map = section.entrySet().stream()
-                .filter(e -> e != null && e.getKey() != null && e.getValue() instanceof Number)
-                .map(e-> new AbstractInt2ObjectMap.BasicEntry<>(((Number)e.getValue()).intValue(), e.getKey()))
-                .filter(e -> e.getIntKey() > 0)
+                .filter(e -> e != null && e.getKey() != null && e.getValue() != null)
+                .map(e-> {
+                    try {
+                        Object value = e.getValue();
+                        return new AbstractInt2ObjectMap.BasicEntry<>(
+                                value instanceof Number? ((Number) value).intValue() 
+                                        : Integer.parseInt(e.getValue().toString()), 
+                                e.getKey());
+                    } catch (NumberFormatException ignored) {
+                        return null;
+                    }
+                })
+                .filter(e -> e != null && e.getIntKey() > 0)
                 .collect(Collectors.toMap(Int2ObjectMap.Entry::getIntKey, Int2ObjectMap.Entry::getValue, (a, b) -> b,
                         Int2ObjectOpenHashMap::new));
         
@@ -166,5 +176,18 @@ class ReservedSlotsListener implements Listener {
     
     private boolean isAffected(PlayerEvent event) {
         return !event.getPlayer().hasPermission(PERM_NOT_AFFECTED);
+    }
+    
+    private boolean getBoolean(String key, boolean defaultValue) {
+        return Boolean.parseBoolean(getConfig(key, Boolean.toString(defaultValue)));
+    }
+    
+    private String getConfig(String key, String defaultValue) {
+        String value = config.getString(key, DEFAULT_VALUE);
+        if (value.equalsIgnoreCase(DEFAULT_VALUE)) {
+            return defaultValue;
+        } else {
+            return value;
+        }
     }
 }
