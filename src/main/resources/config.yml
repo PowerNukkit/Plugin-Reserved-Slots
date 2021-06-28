@@ -1,0 +1,29 @@
+# Change the ping packet to make it always show at least one available slot
+# This prevent the client game from refusing to attempt to connect because
+# it already knows that the server is full
+# 
+# This is needed for the permission reservedslots.joinfull to work 
+# 
+# Default: true
+change-ping-packet: default
+
+# Define the key as the permission you want and the value with the number of the remaining slots 
+# that trigger the reserve.
+#
+# The numbers works this way: If you set 10 for donors and 5 for staff, then when the server have
+# 10 slots left available, only donors and staff will be able to join, but when it have
+# 5 slots left, only staff will be able to join.
+#
+# You can set any permission you want, they don't need to be prefixed with reservedslots.
+#
+# You can use /reservedslots to manage this configuration in game. 
+reserved-slots:
+  reservedslots.group.donor: 10
+  reservedslots.group.staff: 5
+  
+custom-messages:
+  10: Sorry, the server is full. Only donors are able to join now.
+  5: Sorry, the server is full. Only staff are able to join now.
+
+# Never change or comment the line bellow!
+config-version: 1
