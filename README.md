@@ -11,7 +11,7 @@ You can also allow members to join even if the server is full.
 The messages are fully customizable.
 
 ## Cloning and importing
-1. Just do a normal `git clone https://github.com/PowerNukkit/ExamplePlugin.git` (or the URL of your own git repository)
+1. Just do a normal `git clone https://github.com/PowerNukkit/Plugin-Reserved-Slots.git` (or the URL of your own git repository)
 2. Import the `pom.xml` file with your IDE, it should do the rest by itself
 
 ## Debugging

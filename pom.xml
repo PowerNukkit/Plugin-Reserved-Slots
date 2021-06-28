@@ -19,6 +19,9 @@
     <properties>
         <maven.compiler.target>1.8</maven.compiler.target>
         <maven.compiler.source>1.8</maven.compiler.source>
+        <sonar.projectKey>PowerNukkit_Plugin-Reserved-Slots</sonar.projectKey>
+        <sonar.organization>powernukkit</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     </properties>
     
     <build>
