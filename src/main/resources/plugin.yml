@@ -25,3 +25,4 @@ permissions:
     default: false
   reservedslots.joinfull:
     description: Allows the player to join even if the server is completely full
+    default: op

@@ -21,9 +21,9 @@ reserved-slots:
   reservedslots.group.donor: 10
   reservedslots.group.staff: 5
   
-custom-messages:
-  10: Sorry, the server is full. Only donors are able to join now.
-  5: Sorry, the server is full. Only staff are able to join now.
+#custom-messages:
+#  10: Sorry, the server is full. Only donors are able to join now.
+#  5: Sorry, the server is full. Only staff are able to join now.
 
 # Never change or comment the line bellow!
 config-version: 1

@@ -34,7 +34,10 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author joserobjr
@@ -45,6 +48,8 @@ class ReservedSlotsListener implements Listener {
     static final String PERM_JOIN_FULL = "reservedslots.joinfull";
     static final String DEFAULT_VALUE = "default";
     
+    private final Object slotsLock = new Object();
+    private final Object messagesLock = new Object();
     private final Config config;
     private final ResourceBundle defaultMessages;
     
@@ -57,7 +62,10 @@ class ReservedSlotsListener implements Listener {
         this.config = config;
         this.defaultMessages = messages;
     }
-    
+
+    /**
+     * Increase the maximum player limit if the change-ping-packet configuration is enabled.
+     */
     @EventHandler(ignoreCancelled = true)
     public void onQueryRegenerateEvent(QueryRegenerateEvent event) {
         if (event.getMaxPlayerCount() > event.getPlayerCount()) {
@@ -69,13 +77,20 @@ class ReservedSlotsListener implements Listener {
         }
     }
 
+    /**
+     * Allows players who have the permission to join when the server is full to join on that condition 
+     * by cancelling the kick. 
+     */
     @EventHandler(ignoreCancelled = true)
     public void onPlayerKickEvent(PlayerKickEvent event) {
         if (event.getReasonEnum() == PlayerKickEvent.Reason.SERVER_FULL && isAffected(event) && canJoinFull(event)) {
             event.setCancelled(true);
         }
     }
-    
+
+    /**
+     * Apply the restriction to the last slots available on the server.
+     */
     @EventHandler(priority = EventPriority.LOWEST)
     public void onAsyncPreLogin(PlayerPreLoginEvent event) {
         if (!isAffected(event) || canJoinFull(event)) {
@@ -94,12 +109,22 @@ class ReservedSlotsListener implements Listener {
             kickFull(event, slots);
         }
     }
-    
+
+    /**
+     * Cancels the event and set the kick message.
+     * @param event Event to be cancelled
+     * @param slots The amount of slots remaining
+     */
     private void kickFull(PlayerPreLoginEvent event, int slots) {
         event.setCancelled(true);
         event.setKickMessage(getMessage(slots));
     }
-    
+
+    /**
+     * Gets the kick message to be show to players who can't join when the server have that amount of remaining slots.
+     * @param currentSlots Slots remaining.
+     * @return The kick message.
+     */
     private String getMessage(int currentSlots) {
         return getMessagesCache().int2ObjectEntrySet().stream()
                 .filter(e-> e.getIntKey() >= currentSlots)
@@ -107,14 +132,24 @@ class ReservedSlotsListener implements Listener {
                 .map(Map.Entry::getValue)
                 .orElseGet(()-> defaultMessages.getString("reservedslots.reserved"));
     }
-    
+
+    /**
+     * Gets the permission required to join when the server have that amount of remaining slots.
+     * @param currentSlots Slots remaining.
+     * @return Permission required to join.
+     */
     private Optional<String> getReservation(int currentSlots) {
         return getReservedSlotsCache().int2ObjectEntrySet().stream()
                 .filter(e-> e.getIntKey() >= currentSlots)
                 .min(Comparator.comparingInt(Int2ObjectMap.Entry::getIntKey))
                 .map(Map.Entry::getValue);
     }
-    
+
+    /**
+     * Return the cached map which was parsed from the custom-messages config section.
+     *
+     * A new cache is automatically computed when the configuration is changed.
+     */
     private Int2ObjectMap<String> getMessagesCache() {
         ConfigSection section = config.getSection("custom-messages");
         int hash = section.hashCode();
@@ -123,65 +158,123 @@ class ReservedSlotsListener implements Listener {
             return messagesCache;
         }
         
-        cache = section.entrySet().stream()
-                .filter(e-> e != null && e.getKey() != null && e.getValue() != null)
-                .map(e-> {
-                    try {
-                        return new AbstractInt2ObjectMap.BasicEntry<>(Integer.parseInt(e.getKey()), e.getValue().toString());
-                    } catch (NumberFormatException ignored) {
-                        return null;
-                    }
-                })
-                .filter(Objects::nonNull)
-                .filter(e-> e.getIntKey() >= 0)
-                .collect(Collectors.toMap(Int2ObjectMap.Entry::getIntKey, Int2ObjectMap.Entry::getValue, (a,b)->b, 
-                        Int2ObjectOpenHashMap::new));
-        
-        messagesCache = cache;
-        messagesHash = hash;
-        return cache;
+        synchronized (messagesLock) {
+            cache = safeEntryStream(section)
+                    .map(toInt2StringEntry(Map.Entry::getKey, Map.Entry::getValue))
+                    .filter(e -> e != null && e.getIntKey() >= 0)
+                    .collect(toInt2StringMap());
+
+            messagesCache = Int2ObjectMaps.unmodifiable(cache);
+            messagesHash = hash;
+            return cache;
+        }
     }
-    
+
+    /**
+     * Return the cached map which was parsed from the reserved-slots config section.
+     * 
+     * A new cache is automatically computed when the configuration is changed.
+     */
     private Int2ObjectMap<String> getReservedSlotsCache() {
         ConfigSection section = config.getSection("reserved-slots");
         int hash = section.hashCode();
         if (reservedSlotsHash == hash) {
             return reservedSlotsCache;
         }
-        Int2ObjectMap<String> map = section.entrySet().stream()
-                .filter(e -> e != null && e.getKey() != null && e.getValue() != null)
-                .map(e-> {
-                    try {
-                        Object value = e.getValue();
-                        return new AbstractInt2ObjectMap.BasicEntry<>(
-                                value instanceof Number? ((Number) value).intValue() 
-                                        : Integer.parseInt(e.getValue().toString()), 
-                                e.getKey());
-                    } catch (NumberFormatException ignored) {
-                        return null;
-                    }
-                })
-                .filter(e -> e != null && e.getIntKey() > 0)
-                .collect(Collectors.toMap(Int2ObjectMap.Entry::getIntKey, Int2ObjectMap.Entry::getValue, (a, b) -> b,
-                        Int2ObjectOpenHashMap::new));
         
-        reservedSlotsCache = map;
-        reservedSlotsHash = hash;
-        return map;
+        synchronized (slotsLock) {
+            Int2ObjectMap<String> map = safeEntryStream(section)
+                    .map(toInt2StringEntry(Map.Entry::getValue, Map.Entry::getKey))
+                    .filter(e -> e != null && e.getIntKey() > 0)
+                    .collect(toInt2StringMap());
+
+            reservedSlotsCache = Int2ObjectMaps.synchronize(map);
+            reservedSlotsHash = hash;
+            return map;
+        }
     }
-    
+
+    /**
+     * Checks if the player in the event have permission to join even when the server is full.
+     */
     private boolean canJoinFull(PlayerEvent event) {
         return event.getPlayer().hasPermission(PERM_JOIN_FULL);
     }
-    
+
+    /**
+     * Checks if the player in the event should be affected by this plugin.
+     */
     private boolean isAffected(PlayerEvent event) {
         return !event.getPlayer().hasPermission(PERM_NOT_AFFECTED);
     }
-    
+
+    /**
+     * Workaround for https://github.com/PowerNukkit/PowerNukkit/issues/1162
+     */
+    static Stream<Map.Entry<String, String>> safeEntryStream(@SuppressWarnings("rawtypes") Map configSection) {
+        @SuppressWarnings("unchecked")
+        Map<Object, Object> objectMap = configSection;
+
+        Stream<Map.Entry<String, String>> stream =  objectMap.entrySet().stream()
+                .filter(e-> e != null && e.getKey() != null && e.getValue() != null)
+                .map(e-> new AbstractMap.SimpleEntry<>(
+                        Objects.toString(e.getKey()).trim(),
+                        Objects.toString(e.getValue()).trim()
+                ));
+
+        return stream.filter(e-> !e.getValue().isEmpty());
+    }
+
+    /**
+     * Collects {@code Int2ObjectMap.Entry<String>} into a new {@link Int2ObjectOpenHashMap} of {@link String} values. 
+     */
+    private Collector<Int2ObjectMap.Entry<String>, ?, Int2ObjectOpenHashMap<String>> toInt2StringMap() {
+        return Collectors.toMap(
+                Int2ObjectMap.Entry::getIntKey,
+                Int2ObjectMap.Entry::getValue,
+                (a, b) -> b,
+                Int2ObjectOpenHashMap::new
+        );
+    }
+
+    /**
+     * Converts a {@code Map.Entry<String, String>} into a {@code Int2ObjectMap.Entry<String>} by mapping
+     * the returned value of the `keyFunction` and `valueFunction` functions.
+     * 
+     * If The `keyFunction` don't return a valid number parsable by {@link Integer#parseInt(String)},
+     * then `null` is returned.
+     */
+    private Function<Map.Entry<String, String>, Int2ObjectMap.Entry<String>> toInt2StringEntry(
+            Function<Map.Entry<String, String>, String> keyFunction, 
+            Function<Map.Entry<String, String>, String> valueFunction
+    ) {
+        return entry -> createIntToStringEntry(keyFunction.apply(entry), valueFunction.apply(entry));
+    }
+
+    /**
+     * Creates an {@code AbstractInt2ObjectMap.BasicEntry<String>} if `key` is a valid number. Otherwise returns `null`.
+     */
+    private Int2ObjectMap.Entry<String> createIntToStringEntry(String key, String value) {
+        try {
+            return new AbstractInt2ObjectMap.BasicEntry<>(Integer.parseInt(key), value);
+        } catch (NumberFormatException ignored) {
+            return null;
+        }
+    }
+
+    /**
+     * Same as {@link #getConfig(String, String)} but using booleans values.
+     */
     private boolean getBoolean(String key, boolean defaultValue) {
         return Boolean.parseBoolean(getConfig(key, Boolean.toString(defaultValue)));
     }
-    
+
+    /**
+     * Reads a config key checking if it is missing from the configuration or has the special default value.
+     * 
+     * If the key is missing or is the special default value, then the `defaultValue` as parameter is returned,
+     * otherwise, the current value is returned.
+     */
     private String getConfig(String key, String defaultValue) {
         String value = config.getString(key, DEFAULT_VALUE);
         if (value.equalsIgnoreCase(DEFAULT_VALUE)) {
