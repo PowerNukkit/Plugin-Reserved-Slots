@@ -227,9 +227,9 @@ class ReservedSlotsListener implements Listener {
     }
 
     /**
-     * Collects {@code Int2ObjectMap.Entry<String>} into a new {@link Int2ObjectOpenHashMap} of {@link String} values. 
+     * Collects {@code Int2ObjectMap.Entry<String>} into a new {@link Int2ObjectMap} of {@link String} values. 
      */
-    private Collector<Int2ObjectMap.Entry<String>, ?, Int2ObjectOpenHashMap<String>> toInt2StringMap() {
+    static Collector<Int2ObjectMap.Entry<String>, ?, Int2ObjectMap<String>> toInt2StringMap() {
         return Collectors.toMap(
                 Int2ObjectMap.Entry::getIntKey,
                 Int2ObjectMap.Entry::getValue,

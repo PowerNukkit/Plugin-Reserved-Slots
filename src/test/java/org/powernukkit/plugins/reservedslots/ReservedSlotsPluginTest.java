@@ -121,6 +121,28 @@ class ReservedSlotsPluginTest {
         }
     }
 
+    @ParameterizedTest
+    @MethodSource("getBuiltinLanguages")
+    void getLocaleFromTag(Map.Entry<String, Locale> keyValue) {
+        BaseLang lang = mock(BaseLang.class);
+        Locale locale = keyValue.getValue();
+        when(lang.translateString("language.locale")).thenReturn(locale.toString());
+
+        when(server.getLanguage()).thenReturn(lang);
+        try(MockedStatic<ResourceBundle> mockedStatic = mockStatic(ResourceBundle.class)) {
+            mockedStatic.when(() -> ResourceBundle.getBundle(anyString(), any(Locale.class)))
+                    .thenAnswer(call -> {
+                        assertEquals("org.powernukkit.plugins.reservedslots.reserved_slots_messages",
+                                call.getArgument(0));
+                        assertEquals(locale, call.getArgument(1));
+                        return call.callRealMethod();
+                    });
+            
+            plugin.onEnable();
+        }
+
+    }
+
     @UsedByReflection
     private static Set<Map.Entry<String, Locale>> getBuiltinLanguages() {
         return builtinLanguages;

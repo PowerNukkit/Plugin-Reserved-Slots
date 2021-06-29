@@ -8,15 +8,20 @@ import cn.nukkit.event.player.PlayerPreLoginEvent;
 import cn.nukkit.event.server.QueryRegenerateEvent;
 import cn.nukkit.plugin.PluginManager;
 import cn.nukkit.utils.Config;
+import it.unimi.dsi.fastutil.ints.AbstractInt2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import javax.annotation.Nonnull;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -219,6 +224,23 @@ class ReservedSlotsListenerTest {
         listener.onAsyncPreLogin(event);
         assertFalse(event.isCancelled());
     }
+
+    @Test
+    void onAsyncPreLoginNotReserved() {
+        Map<UUID, Player> onlinePlayers = new HashMap<>();
+        onlinePlayers.put(UUID.randomUUID(), mock(Player.class));
+
+        config.set("reserved-slots.custom-permission", "3");
+
+        when(player.hasPermission(ReservedSlotsListener.PERM_NOT_AFFECTED)).thenReturn(false);
+        when(player.hasPermission(ReservedSlotsListener.PERM_JOIN_FULL)).thenReturn(false);
+        when(server.getMaxPlayers()).thenReturn(5);
+        when(server.getOnlinePlayers()).thenReturn(onlinePlayers);
+
+        PlayerPreLoginEvent event = new PlayerPreLoginEvent(player, "");
+        listener.onAsyncPreLogin(event);
+        assertFalse(event.isCancelled());
+    }
     
     @Test
     @SuppressWarnings("unchecked")
@@ -284,5 +306,47 @@ class ReservedSlotsListenerTest {
         permMap2 = (Int2ObjectMap<String>) getReservedSlotsCache.invoke(listener);
         assertNotSame(permMap1, permMap2);
         assertEquals(permMap1, permMap2);
+    }
+
+    @Test
+    void safeEntryStream() {
+        Map<Object, Object> section = new BogusMap();
+        section.put(null, null);
+        section.put("null", null);
+        section.put(null, "null");
+        section.put("empty-value", "");
+        section.put("valid", "value");
+        Map<String, String> result = ReservedSlotsListener.safeEntryStream(section)
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        Map<String, String> expected = new HashMap<>();
+        expected.put("valid", "value");
+        assertEquals(expected, result);
+    }
+    
+    private static class BogusMap extends HashMap<Object, Object> {
+        @Nonnull
+        @Override
+        public Set<Entry<Object, Object>> entrySet() {
+            HashSet<Entry<Object, Object>> entries = new HashSet<>(super.entrySet());
+            entries.add(null);
+            return entries;
+        }
+    }
+
+    @Test
+    void toInt2StringMap() {
+        Int2ObjectMap<String> actual = Stream.of(
+                new AbstractInt2ObjectMap.BasicEntry<>(1, "a"),
+                new AbstractInt2ObjectMap.BasicEntry<>(2, "b"),
+                new AbstractInt2ObjectMap.BasicEntry<>(2, "c"),
+                new AbstractInt2ObjectMap.BasicEntry<>(3, "d")
+        ).collect(ReservedSlotsListener.toInt2StringMap());
+        
+        Int2ObjectMap<String> expected = new Int2ObjectOpenHashMap<>();
+        expected.put(1, "a");
+        expected.put(2, "c");
+        expected.put(3, "d");
+        
+        assertEquals(expected, actual);
     }
 }

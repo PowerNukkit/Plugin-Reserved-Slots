@@ -43,7 +43,12 @@ public class ReservedSlotsPlugin extends PluginBase {
         BaseLang language = getServer().getLanguage();
         String iso6391 = language.translateString("language.locale");
         if (!"language.locale".equals(iso6391)) {
-            return Locale.forLanguageTag(iso6391);
+            String[] parts = iso6391.split("_", 2);
+            if (parts.length == 2) {
+                return new Locale(parts[0], parts[1]);
+            } else {
+                return new Locale(parts[0]);
+            }
         }
         
         switch (language.getLang().toLowerCase(Locale.ENGLISH)) {
