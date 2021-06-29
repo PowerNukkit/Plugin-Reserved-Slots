@@ -53,5 +53,7 @@ jobs:
         git config --local user.name "PowerNukkit Bot"
         git add sitemap.xml
         git add -A ./
-        git commit -m "Update the plugin site"
-        git push
+        if [ ! -z "$(git status --porcelain)" ]; then
+          git commit -m "Update the plugin site"
+          git push
+        fi
