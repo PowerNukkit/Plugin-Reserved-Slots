@@ -153,18 +153,18 @@ class ReservedSlotsListener implements Listener {
     private Int2ObjectMap<String> getMessagesCache() {
         ConfigSection section = config.getSection("custom-messages");
         int hash = section.hashCode();
-        Int2ObjectMap<String> cache;
         if (hash == messagesHash) {
             return messagesCache;
         }
-        
+
         synchronized (messagesLock) {
-            cache = safeEntryStream(section)
+            Int2ObjectMap<String> cache = safeEntryStream(section)
                     .map(toInt2StringEntry(Map.Entry::getKey, Map.Entry::getValue))
                     .filter(e -> e != null && e.getIntKey() >= 0)
                     .collect(toInt2StringMap());
-
-            messagesCache = Int2ObjectMaps.unmodifiable(cache);
+            
+            cache = Int2ObjectMaps.unmodifiable(cache);
+            messagesCache = cache;
             messagesHash = hash;
             return cache;
         }
@@ -183,14 +183,15 @@ class ReservedSlotsListener implements Listener {
         }
         
         synchronized (slotsLock) {
-            Int2ObjectMap<String> map = safeEntryStream(section)
+            Int2ObjectMap<String> cache = safeEntryStream(section)
                     .map(toInt2StringEntry(Map.Entry::getValue, Map.Entry::getKey))
                     .filter(e -> e != null && e.getIntKey() > 0)
                     .collect(toInt2StringMap());
 
-            reservedSlotsCache = Int2ObjectMaps.synchronize(map);
+            cache = Int2ObjectMaps.unmodifiable(cache);
+            reservedSlotsCache = cache;
             reservedSlotsHash = hash;
-            return map;
+            return cache;
         }
     }
 
