@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<project xmlns="http://maven.apache.org/DECORATION/1.1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/DECORATION/1.1.0 http://maven.apache.org/xsd/decoration-1.1.0.xsd">
+
+    <body>
+        <links>
+            <item name="PowerNukkit" href="https://www.powernukkit.org"/>
+        </links>
+        <breadcrumbs>
+            <item name="PowerNukkit" href="https://www.powernukkit.org"/>
+        </breadcrumbs>
+        <menu name="Overview">
+            <item name="Introduction" href="README.html"/>
+            <!--<item name="Usage" href="README.html#Creating_Plugins"/>
+            <item name="Change log" href="CHANGELOG.html"/>-->
+            <item name="Known Issues" href="https://www.github.com/PowerNukkit/Plugin-Reserved-Slots/issues" />
+            <item name="Discord" href="https://powernukkit.org/discord" />
+            <item name="Downloads" href="https://www.github.com/PowerNukkit/Plugin-Reserved-Slots/releases"/>
+            <item name="Source Code" href="https://www.github.com/PowerNukkit/Plugin-Reserved-Slots"/>
+        </menu>
+        <menu ref="reports" inherit="bottom" />
+    </body>
+    <skin>
+        <groupId>org.apache.maven.skins</groupId>
+        <artifactId>maven-fluido-skin</artifactId>
+        <version>1.9</version>
+    </skin>
+    <custom>
+        <fluidoSkin>
+            <topBarEnabled>false</topBarEnabled>
+            <sideBarEnabled>true</sideBarEnabled>
+            <topBarContainerStyle>width: 90%;</topBarContainerStyle>
+        </fluidoSkin>
+    </custom>
+
+</project>
