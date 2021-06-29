@@ -5,7 +5,7 @@
     <name>Reserved Slots Plugin</name>
     <artifactId>plugin-reserved-slots</artifactId>
     <groupId>org.powernukkit.plugins</groupId>
-    <version>0.1.0</version>
+    <version>0.2.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <description>
@@ -51,7 +51,6 @@
         <url>https://github.com/PowerNukkit/Plugin-Reserved-Slots</url>
         <connection>scm:git:https://github.com/PowerNukkit/Plugin-Reserved-Slots.git</connection>
         <developerConnection>scm:git:https://github.com/PowerNukkit/Plugin-Reserved-Slots.git</developerConnection>
-        <tag>v0.1.0</tag>
     </scm>
 
 
