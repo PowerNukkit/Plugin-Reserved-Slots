@@ -55,6 +55,8 @@
         <sonar.java.spotbugs.reportPaths>${build.directory}/spotbugsXml.xml</sonar.java.spotbugs.reportPaths>
         <sonar.coverage.jacoco.xmlReportPaths>${build.directory}/site/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
         <junit.jupiter.version>5.7.2</junit.jupiter.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
     
     <build>
