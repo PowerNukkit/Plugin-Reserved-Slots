@@ -14,7 +14,7 @@
 
 This plugin allows you to define how many player slots will be reserved for a group of players.
 
-As example, you can use it to reserve slots:
+As an example, you can use it to reserve slots:
 - for VIP or donors
 - for staff members
 - for members with a specific permission
