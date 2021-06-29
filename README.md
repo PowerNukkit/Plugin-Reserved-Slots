@@ -1,4 +1,17 @@
 # Reserved Slots Plugin
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=PowerNukkit_Plugin-Reserved-Slots&metric=alert_status)](https://sonarcloud.io/dashboard?id=PowerNukkit_Plugin-Reserved-Slots)
+[![Build and Test](https://github.com/PowerNukkit/Plugin-Reserved-Slots/actions/workflows/maven.yml/badge.svg)](https://github.com/PowerNukkit/Plugin-Reserved-Slots/actions/workflows/maven.yml)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=PowerNukkit_Plugin-Reserved-Slots&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=PowerNukkit_Plugin-Reserved-Slots)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=PowerNukkit_Plugin-Reserved-Slots&metric=reliability_rating)](https://sonarcloud.io/dashboard?id=PowerNukkit_Plugin-Reserved-Slots)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=PowerNukkit_Plugin-Reserved-Slots&metric=security_rating)](https://sonarcloud.io/dashboard?id=PowerNukkit_Plugin-Reserved-Slots)
+<br/>
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=PowerNukkit_Plugin-Reserved-Slots&metric=coverage)](https://sonarcloud.io/dashboard?id=PowerNukkit_Plugin-Reserved-Slots)
+[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=PowerNukkit_Plugin-Reserved-Slots&metric=duplicated_lines_density)](https://sonarcloud.io/dashboard?id=PowerNukkit_Plugin-Reserved-Slots)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=PowerNukkit_Plugin-Reserved-Slots&metric=bugs)](https://sonarcloud.io/dashboard?id=PowerNukkit_Plugin-Reserved-Slots)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=PowerNukkit_Plugin-Reserved-Slots&metric=code_smells)](https://sonarcloud.io/dashboard?id=PowerNukkit_Plugin-Reserved-Slots)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=PowerNukkit_Plugin-Reserved-Slots&metric=vulnerabilities)](https://sonarcloud.io/dashboard?id=PowerNukkit_Plugin-Reserved-Slots)
+
+
 This plugin allows you to define how many player slots will be reserved for a group of players.
 
 As example, you can use it to reserve slots:
