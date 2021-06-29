@@ -5,18 +5,18 @@
     <name>Reserved Slots Plugin</name>
     <artifactId>plugin-reserved-slots</artifactId>
     <groupId>org.powernukkit.plugins</groupId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>0.1.0</version>
     <packaging>jar</packaging>
-    
+
     <description>
         A PowerNukkit plugin that allows the server owner to reserve the last slots to special players.
     </description>
     <url>https://powernukkit.github.io/Plugin-Reserved-Slots/</url>
-    
+
     <ciManagement>
         <url>https://github.com/PowerNukkit/Plugin-Reserved-Slots/actions</url>
     </ciManagement>
-    
+
     <contributors>
         <contributor>
             <url>https://github.com/joserobjr/</url>
@@ -33,7 +33,7 @@
             </roles>
         </contributor>
     </contributors>
-    
+
     <inceptionYear>2021</inceptionYear>
     <issueManagement>
         <url>https://github.com/PowerNukkit/Plugin-Reserved-Slots/issues</url>
@@ -51,8 +51,9 @@
         <url>https://github.com/PowerNukkit/Plugin-Reserved-Slots</url>
         <connection>scm:git:https://github.com/PowerNukkit/Plugin-Reserved-Slots.git</connection>
         <developerConnection>scm:git:https://github.com/PowerNukkit/Plugin-Reserved-Slots.git</developerConnection>
+        <tag>v0.1.0</tag>
     </scm>
-    
+
 
     <dependencies>
         <dependency>
@@ -98,13 +99,14 @@
         <sonar.projectKey>PowerNukkit_Plugin-Reserved-Slots</sonar.projectKey>
         <sonar.organization>powernukkit</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-        <sonar.java.spotbugs.reportPaths>${build.directory}/spotbugsXml.xml</sonar.java.spotbugs.reportPaths>
-        <sonar.coverage.jacoco.xmlReportPaths>${build.directory}/site/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+        <sonar.java.spotbugs.reportPaths>${project.build.directory}/spotbugsXml.xml</sonar.java.spotbugs.reportPaths>
+        <sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco.xml
+        </sonar.coverage.jacoco.xmlReportPaths>
         <junit.jupiter.version>5.7.2</junit.jupiter.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
-    
+
     <build>
         <resources>
             <resource>
@@ -143,7 +145,7 @@
                         <id>enforce</id>
                         <configuration>
                             <rules>
-                                <DependencyConvergence />
+                                <DependencyConvergence/>
                                 <requireJavaVersion>
                                     <version>1.8</version>
                                 </requireJavaVersion>
