@@ -11,7 +11,7 @@
     <description>
         A PowerNukkit plugin that allows the server owner to reserve the last slots to special players.
     </description>
-    <url>https://github.com/PowerNukkit/Plugin-Reserved-Slots</url>
+    <url>https://powernukkit.github.io/Plugin-Reserved-Slots/</url>
     
     <ciManagement>
         <url>https://github.com/PowerNukkit/Plugin-Reserved-Slots/actions</url>
