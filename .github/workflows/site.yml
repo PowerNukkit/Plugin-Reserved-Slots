@@ -21,7 +21,7 @@ jobs:
       with:
         java-version: 1.8
     - name: Generate site
-      run: mvn site
+      run: mvn -B site -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
     - uses: actions/checkout@v2
       name: Checkout last site
       with:
